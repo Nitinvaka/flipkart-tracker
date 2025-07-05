@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" class="transition duration-300">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flipkart Price Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+  <style>
+    .toggle-checkbox:checked + .toggle-label .dot {
+      transform: translateX(100%);
+      background-color: #2563EB;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen flex items-center justify-center transition duration-300">
+  <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg max-w-md w-full">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">🔍 Flipkart Price Tracker</h1>
+      
+      <!-- Toggle Switch -->
+      <div class="flex items-center">
+        <span class="mr-2 text-sm">☀️</span>
+        <input type="checkbox" id="dark-toggle" class="hidden toggle-checkbox">
+        <label for="dark-toggle" class="toggle-label w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center px-1 cursor-pointer">
+          <div class="dot w-4 h-4 bg-white rounded-full shadow-md transform transition duration-300"></div>
+        </label>
+        <span class="ml-2 text-sm">🌙</span>
+      </div>
+    </div>
+
+    <form method="POST" class="space-y-4">
+      <div>
+        <label class="block font-medium">Product URL</label>
+        <input type="text" name="url" required
+               class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
+      </div>
+
+      <div>
+        <label class="block font-medium">Desired Price (₹)</label>
+        <input type="number" name="price" step="0.01" required
+               class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
+      </div>
+
+      <div>
+        <label class="block font-medium">Your Email</label>
+        <input type="email" name="email" required
+               class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
+      </div>
+
+      <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition">
+        Check Price
+      </button>
+    </form>
+
+    {% if result %}
+    <div class="mt-6 p-4 rounded-md {{ 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' if '✅' in result else 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' if 'ℹ️' in result else 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }}">
+      {{ result }}
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    const toggle = document.getElementById('dark-toggle');
+    const html = document.documentElement;
+
+    // Load dark mode from localStorage
+    if (localStorage.getItem('theme') === 'dark') {
+      html.classList.add('dark');
+      toggle.checked = true;
+    }
+
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  </script>
+</body>
+</html>

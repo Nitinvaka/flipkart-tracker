@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: flipkart-tracker
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: EMAIL_ID
+        value: your_email@gmail.com
+      - key: EMAIL_PASS
+        value: your_app_password

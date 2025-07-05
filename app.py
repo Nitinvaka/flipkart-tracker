@@ -6,17 +6,6 @@ from email_alert import alert_system
 
 app = Flask(__name__)
 
-# 🛡️ Updated headers to mimic a real browser
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
-    "Referer": "https://www.google.com/",
-    "DNT": "1",
-    "Connection": "keep-alive",
-}
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = None
@@ -30,8 +19,14 @@ def index():
             return render_template('index.html', result="❌ Invalid price input.")
 
         try:
-            # 📄 Fetch page
-            page = requests.get(url, headers=headers)
+            # ✅ ScraperAPI setup
+            SCRAPER_API_KEY = os.getenv("a7fe103cc9df4e22a62801faf89a4e74")
+            if not SCRAPER_API_KEY:
+                return render_template('index.html', result="❌ Missing ScraperAPI key.")
+
+            # 🧠 Use ScraperAPI with JS rendering enabled
+            scrape_url = f"http://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={url}&render=true"
+            page = requests.get(scrape_url)
             soup = BeautifulSoup(page.content, 'html.parser')
 
             # 🏷️ Get product title
@@ -42,7 +37,7 @@ def index():
             )
             product_title = title_element.get_text().strip() if title_element else "Unknown Product"
 
-            # 💰 Try multiple price selectors (Flipkart changes often)
+            # 💰 Try multiple price selectors (dynamic + legacy)
             price_element = (
                 soup.find("div", class_="_30jeq3 _16Jk6d") or
                 soup.find("div", class_="_1_WHN1") or
@@ -61,11 +56,11 @@ def index():
                 else:
                     result = f"ℹ️ Price is still ₹{price_number}, above your target of ₹{set_price}."
             else:
-                # DEBUGGING: print HTML to console
+                # Optional debug output (can comment out)
                 print("------ DEBUG: PAGE HTML START ------")
-                print(soup.prettify()[:2000])  # Only first 2000 chars
+                print(soup.prettify()[:2000])
                 print("------ DEBUG: PAGE HTML END ------")
-                result = "❌ Could not find the price on the page. Flipkart layout may have changed or blocked the request."
+                result = "❌ Could not find the price on the page. Even with ScraperAPI."
 
         except Exception as e:
             result = f"⚠️ Error: {e}"
@@ -73,7 +68,7 @@ def index():
     return render_template('index.html', result=result)
 
 
-# 🔌 Required for Render deployment
+# 🟢 Make it work on Render (bind to 0.0.0.0 and dynamic port)
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)

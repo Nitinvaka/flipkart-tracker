@@ -4,14 +4,16 @@ import requests
 import os
 from email_alert import alert_system
 
-app = Flask(__name__)  # ✅ define app BEFORE using @app.route
+app = Flask(__name__)
 
+# Headers to mimic a browser
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
     "Accept-Language": "en-US,en;q=0.9",
     "DNT": "1",
     "Connection": "close"
 }
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = None
@@ -29,11 +31,16 @@ def index():
             soup = BeautifulSoup(page.content, 'html.parser')
 
             # Get product title
-            title_element = soup.find("span", class_="VU-ZEz")
+            title_element = soup.find("span", class_="VU-ZEz") or soup.find("span", class_="B_NuCI")
             product_title = title_element.get_text().strip() if title_element else "Unknown Product"
 
-            # Get price
-            price_element = soup.find("div", class_="Nx9bqj CxhGGd")
+            # ✅ UPDATED: Try finding the price using common Flipkart class names
+            price_element = (
+                soup.find("div", {"class": "_30jeq3 _16Jk6d"}) or
+                soup.find("div", {"class": "_25b18c"}) or
+                soup.find("div", {"class": "_1_WHN1"})
+            )
+
             if price_element:
                 price_text = price_element.get_text().strip()
                 price_number = float(price_text.replace('₹', '').replace(',', ''))
@@ -50,6 +57,8 @@ def index():
             result = f"⚠️ Error: {e}"
 
     return render_template('index.html', result=result)
+
+# ✅ Required for Render deployment (dynamic port)
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Render provides a PORT env variable
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
